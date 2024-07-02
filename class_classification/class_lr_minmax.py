@@ -11,12 +11,12 @@ from keras.utils import to_categorical
 
 df = pd.read_csv('data_to_ml.csv')
 
-X = df.drop('Faction', axis=1)
-y = df['Faction']
+X = df.drop('Class', axis=1)
+y = df['Class']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-categorical_columns = ['Class', 'Rol', 'Class Type', 'Armor Type']
+categorical_columns = ['Faction', 'Rol', 'Class Type', 'Armor Type']
 encoder = OneHotEncoder(handle_unknown='ignore')
 
 X_train_encoded = encoder.fit_transform(X_train[categorical_columns])

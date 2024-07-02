@@ -14,12 +14,12 @@ import keras_tuner as kt
 
 df = pd.read_csv('data_to_ml.csv')
 
-X = df.drop('Faction', axis=1)
-y = df['Faction']
+X = df.drop('Class', axis=1)
+y = df['Class']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-categorical_columns = ['Class', 'Rol', 'Class Type', 'Armor Type']
+categorical_columns = ['Faction', 'Rol', 'Class Type', 'Armor Type']
 encoder = OneHotEncoder(handle_unknown='ignore')
 
 X_train_encoded = encoder.fit_transform(X_train[categorical_columns])
@@ -40,6 +40,7 @@ y_test_encoded = label_encoder.transform(y_test)
 
 y_train_categorical = to_categorical(y_train_encoded)
 y_test_categorical = to_categorical(y_test_encoded)
+
 
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)

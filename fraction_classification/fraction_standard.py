@@ -1,17 +1,13 @@
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-import numpy as np
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import OneHotEncoder, StandardScaler, LabelEncoder
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder, StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, accuracy_score
-from tensorflow.keras.utils import to_categorical
-import keras_tuner as kt
+from sklearn.metrics import accuracy_score, classification_report
+from keras.utils import to_categorical
 
 df = pd.read_csv('data_to_ml.csv')
 
@@ -50,22 +46,24 @@ param_grid_standard = {
     'logisticregression__max_iter': [1000, 2000, 3000],
     'logisticregression__class_weight': [None, 'balanced'],
 }
-grid_search_standard = GridSearchCV(pipeline_standard, param_grid_standard, cv=10, n_jobs=-1, verbose=1)
+random_search_standard = RandomizedSearchCV(pipeline_standard, param_grid_standard, n_iter=50, cv=5, n_jobs=-1, 
+                                   verbose=1, random_state=42)
 
-grid_search_standard.fit(X_train, y_train_encoded)
-y_pred_standard = grid_search_standard.predict(X_test)
-y_train_pred_standard = grid_search_standard.predict(X_train)
-accuracy_standard = accuracy_score(y_test_encoded, y_pred_standard)
+random_search_standard.fit(X_train, y_train_encoded)
+y_pred_test_standard = random_search_standard.predict(X_test)
+y_pred_train_standard = random_search_standard.predict(X_train)
 
-y_test_labels = label_encoder.inverse_transform(y_test_encoded)
-y_pred_labels = label_encoder.inverse_transform(y_pred_standard)
-y_train_labels = label_encoder.inverse_transform(y_train_encoded)
-y_train_pred_labels = label_encoder.inverse_transform(y_train_pred_standard)
+y_test_labels_standard = label_encoder.inverse_transform(y_test_encoded)
+y_pred_test_labels_standard = label_encoder.inverse_transform(y_pred_test_standard)
+y_train_labels_standard = label_encoder.inverse_transform(y_train_encoded)
+y_pred_train_labels_standard = label_encoder.inverse_transform(y_pred_train_standard)
 
-print("StandardScaler best params:", grid_search_standard.best_params_)
+accuracy_standard = accuracy_score(y_test_labels_standard, y_pred_test_labels_standard)
+
+print("StandardScaler best params:", random_search_standard.best_params_)
 print("StandardScaler accuracy:", accuracy_standard)
-print("StandardScaler best score:", grid_search_standard.best_score_)
+print("StandardScaler best score:", random_search_standard.best_score_)
 print("Classification Report for Test Data")
-print(classification_report(y_test_labels, y_pred_labels))
+print(classification_report(y_test_labels_standard, y_pred_test_labels_standard))
 print("Classification Report for Training Data")
-print(classification_report(y_train_labels, y_train_pred_labels))
+print(classification_report(y_train_labels_standard, y_pred_train_labels_standard))
